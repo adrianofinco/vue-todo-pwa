@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/vue-todo-pwa/">
+  <link rel="stylesheet" href="app.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico">
+  <meta name="description" content="A task organizer web app made in vue and with support for offline usgae">
+  <title>Tasks Organizer</title>
+</head>
+<body>
+
+  <div id="app">
+    <app-header></app-header>
+    <app-body></app-body>
+    <options-modal></options-modal>
+    <input hidden type="file" id="uploadInput">
+    <a hidden download="tasklist.json" id="downloadAnchor"></a>
+    <div v-if="loading" class="absolute z-30 bg-gray-100 top-0 left-0 w-full h-full flex justify-center items-center">
+      <div class="loader text-green-500"></div>
+      <span class="absolute text-lg uppercase">Loading</span>
+    </div>
+  </div>
+
+  <template id="appHeader">
+    <div class="bg-green-500 py-8 shadow-lg">
+      <h1 class="mx-5 text-3xl text-gray-100 inline">Tasks Organizer</h1>
+      <button @click="openModal" class="mr-6 text-lg text-gray-100 float-right outline-none">
+        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+  </template>
+
+  <template id="appBody">
+    <div class="mt-4 md:mx-8">
+      <tasklist-heading></tasklist-heading>
+      <tasklist-body></tasklist-body>
+    </div>
+  </template>
+
+  <template id="tasklistHeading">
+    <div class="flex flex-row justify-evenly">
+      <div>
+        <table class="text-lg font-normal text-gray-800">
+          <tr class="">
+            <td class="pr-3 sm:pr-6">Total tasks</td>
+            <td class="font-bold">{{ taskCount }}</td>
+          </tr>
+          <tr>
+            <td class="pr-3 sm:pr-6">Complete tasks</td>
+            <td class="font-bold">{{ completeTaskCount }}</td>
+          </tr>
+          <tr>
+            <td class="pr-3 sm:pr-6">Remaining tasks</td>
+            <td class="font-bold">{{ remainingTaskCount }}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="flex flex-col justify-center">
+        <button @click="createTask()" class="px-4 py-2 bg-green-500 text-gray-100 outline-none focus:bg-green-600">
+          Create new task
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <template id="tasklistBody">
+    <div class="max-w-3xl mx-auto my-6">
+      <ul>
+        <tasklist-item :key="task.id" :task="task" v-for="task in tasklist"></tasklist-item>
+        <li v-show="taskCount > 0" class="border-b-2 border-gray-600"></li>
+      </ul>
+    </div>
+  </template>
+
+  <template id="tasklistItem">
+    <li class="border-2 border-b-0 border-gray-600 px-4 py-2 text-lg bg-green-500 bg-opacity-95 text-white">
+      <div class="flex items-center">
+        <input type="checkbox" v-model.lazy="task.complete" @change="updateDatabase" 
+        class="cursor-pointer mr-2 outline-none sm:mr-4 sm:w-12 sm:h-12">
+        <input @click="focusTask(task.id, false)" v-model.lazy="task.title" @change="updateDatabase" :disabled="task.complete"
+        class="border-2 border-gray-400 flex-grow focus:border-gray-900 h-8 mr-2 outline-none p-2 sm:h-auto text-gray-900"
+        :class="task.complete ? [ 'bg-gray-200', 'text-gray-600'] : []">
+        <button @click="deleteTask(task.id)" class="mr-2 outline-none sm:px-2 rounded-full">
+          <svg class="w-6 h-6 sm:w-8 sm:h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <button @click="focusTask(task.id)" :class="{ 'transform': isFocused }"
+        class="rotate-180 transition-transform duration-200 outline-none sm:px-1 rounded-full">
+          <svg class="w-6 h-6 sm:w-10 sm:h-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+      <div class="mt-2 sm:mt-4" v-show="isFocused" >
+        <textarea v-model.lazy="task.description" @change="updateDatabase" :disabled="task.complete"
+        class="resize-none w-full h-64 text-gray-900 p-2 outline-none border-2 border-gray-400 focus:border-gray-900"
+        :class="task.complete ? [ 'bg-gray-200', 'text-gray-600'] : []">
+        </textarea>
+      </div>
+    </li>
+  </template>
+
+  <template id="optionsModal">
+    <div v-show="isModalOpen" 
+    class="bg-black bg-opacity-70 w-full h-full absolute top-0 left-0 flex justify-center items-center">
+      <div class="z-20 bg-gray-200 rounded-md relative pt-12 pb-6 px-12 sm:px-20 flex flex-col">
+        <h1 class="text-lg font-bold text-center uppercase bg-green-500 text-white py-2
+        absolute top-0 w-full left-0 rounded-t-md">Options
+          <button @click="closeModal" class="absolute top-0.5 right-2 text-white outline-none text-4xl">&times;</button>
+        </h1>
+        <button @click="exportTasklist" title="Export your tasks as a JSON file"
+        class="px-4 py-2 bg-green-500 text-gray-100 outline-none focus:bg-green-600 mt-4">
+          Export task list
+        </button>
+        <button v-if="isInstallAllowed" @click="addToHomeScreen" title="Add this app to your home screen for offline usage"
+        class="px-4 py-2 bg-green-500 text-gray-100 outline-none focus:bg-green-600 mt-4">
+          Add to homescreen
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <template id="unsupported">
+    <div class="flex flex-col items-center justify-center mx-8 my-8 sm:mx-28 text-gray-800">
+      <h1 class="mb-8 text-2xl sm:text-3xl">Oops an error occurred :(</h1> 
+      <p class="text-lg"> 
+        Looks like your browser doesn't support <i class="text-green-500">indexedDB</i>, 
+        without that we can't save your tasks, try using a more up-to-date browser.
+      </p>
+    </div>
+  </template>
+
+  <script src="https://unpkg.com/vue@2.6.12/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuex@3.6.0/dist/vuex.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
