@@ -1,0 +1,32 @@
+{
+  "name": "vue-todo-pwa",
+  "version": "1.0.0",
+  "description": "A tasklist app made in Vue and with client-side storage and support for offline usage",
+  "private": true,
+  "scripts": {
+    "dev": "postcss tailwind.css -o public/app.css",
+    "build": "postcss tailwind.css -o public/app.css -- PURGE && node rlc.js",
+    "test": "eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adrianofinco/vue-todo-pwa.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adrianofinco/vue-todo-pwa/issues"
+  },
+  "homepage": "https://github.com/adrianofinco/vue-todo-pwa#readme",
+  "devDependencies": {
+    "cssnano": "^4.1.10",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-vue": "^7.2.0",
+    "postcss": "^8.2.1",
+    "postcss-cli": "^8.3.0",
+    "tailwindcss": "^2.0.1"
+  }
+}

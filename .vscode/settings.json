@@ -1,0 +1,11 @@
+{
+  "liveServer.settings.CustomBrowser": "chrome:PrivateMode",
+  "liveServer.settings.port": 8080,
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "/*.*"
+  ],
+  "liveServer.settings.mount": [
+    ["/vue-todo-pwa/", "./public"],
+  ]
+}

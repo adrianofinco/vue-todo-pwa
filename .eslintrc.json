@@ -1,0 +1,38 @@
+{
+    "globals": {
+        "Vue": "readonly",
+        "Vuex": "readonly"
+    },
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:vue/essential",
+        "airbnb-base"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 12
+    },
+    "plugins": [
+        "vue"
+    ],
+    "rules": {
+        "no-param-reassign": "off",
+        "no-console": "warn"
+    },
+    "overrides": [
+        {
+            "files": ["public/sw.js"],
+            "env": {
+                "serviceworker": true,
+                "browser": true,
+                "es2021": true
+            },
+            "rules": {
+                "no-restricted-globals": "off",
+                "no-console": "warn"
+            }
+        }
+    ]
+}
