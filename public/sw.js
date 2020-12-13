@@ -19,8 +19,8 @@ const cacheAssets = [
   './img/icons/icon-192x192.png',
   './img/icons/icon-270x270.png',
   './img/icons/icon-512x512.png',
-  'https://unpkg.com/vue@2.6.12/dist/vue.js',
-  'https://unpkg.com/vuex@3.6.0/dist/vuex.js',
+  'https://unpkg.com/vue@2.6.12/dist/vue.min.js',
+  'https://unpkg.com/vuex@3.6.0/dist/vuex.min.js',
 ];
 
 // call install event
